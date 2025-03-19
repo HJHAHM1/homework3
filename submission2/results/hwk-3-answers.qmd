@@ -1,0 +1,117 @@
+---
+title: "Homework 3"
+subtitle: "Research Methods, Spring 2025"
+author: Justin Hahm
+format:
+  pdf:
+    output-file: "hahm-j-hwk3-2"
+    output-ext: "pdf"
+    header-includes:
+      - \usepackage{float}
+      - \floatplacement{table}{H}
+---
+
+```{r}
+#| include: false
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, readr, readxl, hrbrthemes, fixest,
+               scales, gganimate, gapminder, gifski, png, tufte, plotly, OECD,
+               ggrepel, survey, foreign, devtools, pdftools, kableExtra, modelsummary,
+               kableExtra)
+```
+
+
+
+```{r}
+#| include: false
+#| eval: true
+ 
+load("C:/Users/hjust/OneDrive/Documents/GitHub/homework3/submission2/Hwk3_workspace.Rdata")
+```
+
+
+My answers to the homework questions are described below. Note that I do the analysis for these answers in a separate `R` script. My analysis file is available in the analysis folder. The GitHub repository for this work is available [here](https://github.com/HJHAHM1/homework3.git). Enjoy!
+
+
+\newpage
+# Summarize the Data
+\noindent 1. Present a bar graph showing the proportion of states with a change in their cigarette tax in each year from 1970 to 1985. @fig-prop <br>
+
+```{r} 
+#| echo: false
+#| label: fig-prop
+#| fig-cap: Proportion of states with a change in their cigarette tax in each year. 
+
+fig.prop
+
+```
+
+\newpage
+\noindent 2. Plot on a single graph the average tax (in 2012 dollars) on cigarettes and the average price of a pack of cigarettes from 1970 to 2018. @fig-price <br>
+
+```{r} 
+#| echo: false
+#| label: fig-price
+#| fig-cap: Average tax (in 2012 dollars) on cigarettes and the average price of a pack of cigarettes from 1970 to 2018.
+
+fig.price
+
+```
+
+\newpage
+\noindent 3. Identify the 5 states with the highest increases in cigarette prices (in dollars) over the time period. Plot the average number of packs sold per capita for those states from 1970 to 2018. @fig-state-top <br>
+
+```{r} 
+#| echo: false
+#| label: fig-state-top
+#| fig-cap: Change in sales of the 5 states with the highest increases in cigarette prices (in dollars)
+
+fig.state.top
+
+```
+
+\newpage
+\noindent 4. Identify the 5 states with the lowest increases in cigarette prices over the time period. Plot the average number of packs sold per capita for those states from 1970 to 2018. @fig-state-low <br>
+
+```{r} 
+#| echo: false
+#| label: fig-state-low
+#| fig-cap: Change in sales of the 5 states with the lowest increases in cigarette prices (in dollars)
+
+fig.state.low
+
+```
+
+\noindent 5. Compare the trends in sales from the 5 states with the highest price increases to those with the lowest price increases. <br>
+
+Sales decreases as a response to price increases for both the top 5 and lowest 5 states. However, the top 5 states with the highest price increase have a sharper drop in sales than the lowest 5 states, which is the response we would expect with higher price increases for an elastic good. 
+
+\newpage
+# Estimate ATEs
+I provide all the coefficients required to answer questions 6 through 9 in @tab-coeftable. The top panel presents the main regression results, and the subsequent panels will describe additional information pertaining to the IV estimator.
+
+```{r} 
+#| echo: false
+#| label: tab-coeftable
+#| tbl-cap: "Elasticity Estimates from OLS and IV" 
+
+f <- function(x) formatC(x, digits = 0, big.mark = ",", format = "f")
+        modelsummary(list("Estimates" = list("OLS" = ols, "IV" = ivs, "OLS" = ols.2, "IV" = ivs.2), 
+                      "Reduced Form" = list("IV" = reduced, "IV" = reduced.2), 
+                      "First Stage" = list("IV" = step1, "IV"= step1.2)),
+                    shape = "rbind",
+                    coef_map = c('ln_price_cpi' = "Log Price",
+                                'fit_ln_price_cpi' = "Log Price",
+                                'ln_total_tax' = "Log Tax"),
+                    gof_map=list(list("raw" = "nobs", "clean" = "N", "fmt" = f),
+                                 list("raw" = "r.squared", "clean" = "R2", "fmt" = 2)), 
+                    output = "kableExtra") %>%
+        add_header_above(c(" " = 1, "1970 - 1990" =2, "1991 - 2015" = 2))%>%
+        kable_styling(latex_options="hold_position")
+```
+
+\newpage
+\noindent 10. Compare your elasticity estimates from 1970-1990 versus those from 1991-2015. Are they different? If so, why?
+
+The elasticity estimates are different. The 1991 to 2015 IV estimate is -1.15 or more elastic. This is because the instrumental variable Log Tax is more closely correlated with the data in this panel. This highlights the significant role that local average treatment effects can have. The largest federal tax change happened after 1990 as we discussed in class. So, in other words, after controlling for the increase in average tax over time (as policies to limit smoking took place) demonstrate that cigarettes became more elastic in recent years. It inutiviely makes sense that culturally cigarettes used to be more inelastic in the past. 
